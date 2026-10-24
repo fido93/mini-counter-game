@@ -8,7 +8,7 @@ on:
 jobs:
   expo-build:
     name: Build Expo Android
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repository
@@ -21,9 +21,10 @@ jobs:
           cache: npm
 
       - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
+        uses: expo/expo-github-action@v9
         with:
           eas-version: latest
+          eas-cache: false
           token: ${{ secrets.EXPO_TOKEN }}
           packager: npm
 

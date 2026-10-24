@@ -1,19 +1,17 @@
 name: Expo CI Build
 
 on:
-  pull_request:
-    types: [closed]
+  push:
     branches:
       - master
 
 jobs:
   expo-build:
     name: Build Expo Android
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout master branch
+      - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Setup Node.js

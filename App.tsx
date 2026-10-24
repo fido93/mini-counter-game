@@ -13,6 +13,7 @@ export default function App() {
             { opacity: 0.15, height: "auto", width: "auto" },
           ]}
           resizeMode="cover"
+          accessible={false}
         />
         <StartGameScreen />
       </View>

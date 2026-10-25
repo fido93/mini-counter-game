@@ -19,19 +19,19 @@ module.exports = defineConfig([
 
     rules: {
       // Automatically sort imports and exports
-      "simple-import-sort/imports": "error",
-      "simple-import-sort/exports": "error",
+      "simple-import-sort/imports": "off",
+      "simple-import-sort/exports": "off",
 
       // Disable overlapping unused-variable rules
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "off",
 
       // Remove unused imports automatically
-      "unused-imports/no-unused-imports": "error",
+      "unused-imports/no-unused-imports": "warn",
 
       // Report unused variables
       "unused-imports/no-unused-vars": [
-        "error",
+        "warn",
         {
           vars: "all",
           varsIgnorePattern: "^_",

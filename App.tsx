@@ -78,9 +78,7 @@ export default function App() {
           resizeMode="cover"
           accessible={false}
         />
-        <SafeAreaView>
-          <GameOverScreen />
-        </SafeAreaView>
+        <SafeAreaView>{screen}</SafeAreaView>
       </View>
     </LinearGradient>
   );

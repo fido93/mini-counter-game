@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, FlatList, StyleSheet, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 
 import Title from "../components/Title";
@@ -7,10 +7,12 @@ import Button from "../components/PrimaryButton";
 import Card from "../components/Card";
 import InstructionText from "../components/InstructionText";
 import Feather from "@react-native-vector-icons/feather";
+import GuessLogItem from "../components/GuessLogItem";
 
 type GameScreenProps = {
   numberUserInput: number;
   onGameOver: (gameOver: boolean) => void;
+  userRound: any;
 };
 
 type Direction = "lower" | "greater";
@@ -25,7 +27,11 @@ function generateRandomBetween(min: any, max: any, exclude: any) {
   }
 }
 
-function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
+function GameScreen({
+  numberUserInput,
+  onGameOver,
+  userRound,
+}: GameScreenProps) {
   // Boundaries persist between renders
   const minBoundary = useRef(1);
   const maxBoundary = useRef(100);
@@ -33,6 +39,8 @@ function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
   // Generate the initial guess only once
   const initialGuess = generateRandomBetween(1, 100, numberUserInput);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
+  const [guestRounds, setGuessRounds] = useState([initialGuess]);
+  const guessRoundsListLength = guestRounds.length;
 
   function nextGuessHandler(direction: Direction) {
     if (
@@ -70,6 +78,7 @@ function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
     );
 
     setCurrentGuess(newRandomNumber);
+    setGuessRounds((prevGuessRounds) => [newRandomNumber, ...prevGuessRounds]);
   }
 
   useEffect(() => {
@@ -77,6 +86,15 @@ function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
       onGameOver(true);
     }
   }, [currentGuess, numberUserInput, onGameOver]);
+
+  useEffect(() => {
+    minBoundary.current = 1;
+    maxBoundary.current = 100;
+  }, []);
+
+  useEffect(() => {
+    userRound(guessRoundsListLength);
+  }, [guessRoundsListLength, userRound]);
 
   return (
     <View style={styles.screen}>
@@ -99,6 +117,18 @@ function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
           </View>
         </View>
       </Card>
+      <View>
+        <FlatList
+          data={guestRounds}
+          renderItem={(itemData) => (
+            <GuessLogItem
+              roundNumber={guessRoundsListLength - itemData.index}
+              guess={itemData.item}
+            />
+          )}
+          keyExtractor={(item) => item}
+        />
+      </View>
     </View>
   );
 }

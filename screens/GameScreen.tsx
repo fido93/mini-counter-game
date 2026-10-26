@@ -1,4 +1,4 @@
-import { Alert, StyleSheet, View } from "react-native";
+import { Alert, FlatList, StyleSheet, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 
 import Title from "../components/Title";
@@ -7,22 +7,27 @@ import Button from "../components/PrimaryButton";
 import Card from "../components/Card";
 import InstructionText from "../components/InstructionText";
 import Feather from "@react-native-vector-icons/feather";
+import GuessLogItem from "../components/GuessLogItem";
 
 type GameScreenProps = {
   numberUserInput: number;
-  onGameOver: (gameOver: boolean) => void;
+  onGameOver: (rounds: number) => void;
 };
 
 type Direction = "lower" | "greater";
 
-function generateRandomBetween(min: any, max: any, exclude: any) {
-  const rndNum = Math.floor(Math.random() * (max - min)) + min;
+// Random integer in [min, max] (inclusive), never equal to `exclude`
+function generateRandomBetween(min: number, max: number, exclude: number) {
+  const isExcludeInRange = exclude >= min && exclude <= max;
+  const candidates = max - min + 1 - (isExcludeInRange ? 1 : 0);
 
-  if (rndNum === exclude) {
-    return generateRandomBetween(min, max, exclude);
-  } else {
-    return rndNum;
+  if (candidates <= 0) {
+    return exclude;
   }
+
+  const rndNum = min + Math.floor(Math.random() * candidates);
+
+  return isExcludeInRange && rndNum >= exclude ? rndNum + 1 : rndNum;
 }
 
 function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
@@ -30,9 +35,12 @@ function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
   const minBoundary = useRef(1);
   const maxBoundary = useRef(100);
 
-  // Generate the initial guess only once
-  const initialGuess = generateRandomBetween(1, 100, numberUserInput);
-  const [currentGuess, setCurrentGuess] = useState(initialGuess);
+  // Guesses, newest first. The initial guess is generated only once.
+  const [guesses, setGuesses] = useState(() => [
+    generateRandomBetween(1, 100, numberUserInput),
+  ]);
+  const currentGuess = guesses[0];
+  const guessesCount = guesses.length;
 
   function nextGuessHandler(direction: Direction) {
     if (
@@ -69,14 +77,19 @@ function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
       currentGuess,
     );
 
-    setCurrentGuess(newRandomNumber);
+    setGuesses((prevGuesses) => [newRandomNumber, ...prevGuesses]);
   }
 
   useEffect(() => {
     if (currentGuess === numberUserInput) {
-      onGameOver(true);
+      onGameOver(guessesCount);
     }
-  }, [currentGuess, numberUserInput, onGameOver]);
+  }, [currentGuess, numberUserInput, guessesCount, onGameOver]);
+
+  useEffect(() => {
+    minBoundary.current = 1;
+    maxBoundary.current = 100;
+  }, []);
 
   return (
     <View style={styles.screen}>
@@ -99,6 +112,18 @@ function GameScreen({ numberUserInput, onGameOver }: GameScreenProps) {
           </View>
         </View>
       </Card>
+      <View style={styles.listContainer}>
+        <FlatList
+          data={guesses}
+          renderItem={(itemData) => (
+            <GuessLogItem
+              roundNumber={guessesCount - itemData.index}
+              guess={itemData.item}
+            />
+          )}
+          keyExtractor={(item) => String(item)}
+        />
+      </View>
     </View>
   );
 }
@@ -107,7 +132,12 @@ export default GameScreen;
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
     padding: 12,
+  },
+  listContainer: {
+    flex: 1,
+    padding: 16,
   },
   buttonsContainer: {
     flexDirection: "row",

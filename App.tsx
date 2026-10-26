@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 
 import GameScreen from "./screens/GameScreen";
@@ -22,6 +22,12 @@ SplashScreen.setOptions({
 export default function App() {
   const [userNumber, setUserNumber] = useState<number>();
   const [gameIsOver, setGameIsOver] = useState(false);
+  const [guessRounds, setGuessRounds] = useState(0);
+
+  const gameOverHandler = useCallback((rounds: number) => {
+    setGuessRounds(rounds);
+    setGameIsOver(true);
+  }, []);
 
   const [fontLoaded, fontError] = useFonts({
     "open-sans": require("./assets/fonts/OpenSans-Regular.ttf"),
@@ -48,8 +54,10 @@ export default function App() {
     setGameIsOver(false);
   }
 
-  function gameOverHandler() {
-    setGameIsOver(true);
+  function startNewGameHandler() {
+    setUserNumber(undefined);
+    setGameIsOver(false);
+    setGuessRounds(0);
   }
 
   let screen = <StartGameScreen onConfirmNumber={pickedNumberHandler} />;
@@ -61,7 +69,13 @@ export default function App() {
   }
 
   if (gameIsOver && userNumber) {
-    screen = <GameOverScreen />;
+    screen = (
+      <GameOverScreen
+        userNumber={userNumber}
+        roundsNumber={guessRounds}
+        onStartNewGame={startNewGameHandler}
+      />
+    );
   }
   return (
     <LinearGradient
@@ -78,7 +92,7 @@ export default function App() {
           resizeMode="cover"
           accessible={false}
         />
-        <SafeAreaView>{screen}</SafeAreaView>
+        <SafeAreaView style={styles.container}>{screen}</SafeAreaView>
       </View>
     </LinearGradient>
   );

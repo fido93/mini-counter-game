@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Image, StyleSheet, View } from "react-native";
 
 import GameScreen from "./screens/GameScreen";
@@ -23,6 +23,11 @@ export default function App() {
   const [userNumber, setUserNumber] = useState<number>();
   const [gameIsOver, setGameIsOver] = useState(false);
   const [guessRounds, setGuessRounds] = useState(0);
+
+  const gameOverHandler = useCallback((rounds: number) => {
+    setGuessRounds(rounds);
+    setGameIsOver(true);
+  }, []);
 
   const [fontLoaded, fontError] = useFonts({
     "open-sans": require("./assets/fonts/OpenSans-Regular.ttf"),
@@ -49,12 +54,9 @@ export default function App() {
     setGameIsOver(false);
   }
 
-  function gameOverHandler() {
-    setGameIsOver(true);
-  }
-
   function startNewGameHandler() {
-    setUserNumber(0);
+    setUserNumber(undefined);
+    setGameIsOver(false);
     setGuessRounds(0);
   }
 
@@ -62,11 +64,7 @@ export default function App() {
 
   if (userNumber) {
     screen = (
-      <GameScreen
-        numberUserInput={userNumber}
-        onGameOver={gameOverHandler}
-        userRound={setGuessRounds}
-      />
+      <GameScreen numberUserInput={userNumber} onGameOver={gameOverHandler} />
     );
   }
 
@@ -94,7 +92,7 @@ export default function App() {
           resizeMode="cover"
           accessible={false}
         />
-        <SafeAreaView>{screen}</SafeAreaView>
+        <SafeAreaView style={styles.container}>{screen}</SafeAreaView>
       </View>
     </LinearGradient>
   );

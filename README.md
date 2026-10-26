@@ -14,7 +14,6 @@ Lying about a hint triggers a "Don't lie!" warning.
 
 - [Expo](https://expo.dev) (SDK 58) and React Native
 - TypeScript
-- Expo Router-free navigation via simple screen state
 - ESLint, Prettier, and Husky for code quality
 
 ## Getting Started
